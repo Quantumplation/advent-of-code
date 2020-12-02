@@ -13,6 +13,7 @@ fn solve<P, I, S, R>(file: &str, p: P, s: S) -> Result<R>
 
 fn main() -> Result<()> {
     println!("1.1) {:?}", solve("input/day1.txt", vec_of::parse, day1_1::sum_2020)?);
+    println!("1.2) {:?}", solve("input/day1.txt", vec_of::parse, day1_2::sum_3_2020)?);
 
     Ok(())
 }
