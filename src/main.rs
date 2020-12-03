@@ -16,6 +16,7 @@ fn main() -> Result<()> {
     println!("1.2) {:?}", solve("input/day1.txt", vec_of::parse, day1::sum_3_2020)?);
     println!("2.1) {:?}", solve("input/day2.txt", vec_of::parse, day2::part1::solve)?);
     println!("2.2) {:?}", solve("input/day2.txt", vec_of::parse, day2::part2::solve)?);
+    println!("3.1) {:?}", solve("input/day3.txt", vec_of::parse, day3::part1)?);
 
     Ok(())
 }
