@@ -1,7 +1,7 @@
 use anyhow::*;
-use std::{fmt::Debug, fs, str::FromStr};
+use std::{fmt::Debug, path::PathBuf, fs, str::FromStr};
 
-pub fn parse<T>(file: &str) -> Result<Vec<T>>
+pub fn vec_of<T>(file: PathBuf) -> Result<Vec<T>>
 where
     T: FromStr,
     <T as FromStr>::Err: Debug,

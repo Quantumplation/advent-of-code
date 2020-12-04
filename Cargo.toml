@@ -1,11 +1,8 @@
-[package]
-name = "advent-2020"
-version = "0.1.0"
-authors = ["Pi Lanningham <pi@attentivemobile.com>"]
-edition = "2018"
+[workspace]
 
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
-
-[dependencies]
-anyhow = "1.0.34"
-matches = "0.1.8"
+members = [
+  "advent-shared",
+  "advent-2019",
+  "advent-2020"
+]
+default-members = ["advent-2020"]
