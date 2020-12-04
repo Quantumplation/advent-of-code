@@ -1,13 +1,21 @@
 use anyhow::*;
 use std::{collections::HashSet};
 
-pub fn sum_2020(numbers: Vec<u64>) -> Result<u64> {
-    find_product(2020, &numbers[..])
+pub mod part1 {
+    use super::*;
+
+    pub fn solve(numbers: Vec<u64>) -> Result<u64> {
+        find_product(2020, &numbers[..])
+    }
 }
 
-pub fn sum_3_2020(numbers: Vec<u64>) -> Result<u64> {
-    find_3_product(2020, &numbers[..])
+pub mod part2 {
+    use super::*;
+    pub fn solve(numbers: Vec<u64>) -> Result<u64> {
+        find_3_product(2020, &numbers[..])
+    }
 }
+
 
 pub fn find_product(sum: u64, numbers: &[u64]) -> Result<u64> {
     let mut seen = HashSet::new();

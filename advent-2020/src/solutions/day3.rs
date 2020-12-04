@@ -1,24 +1,31 @@
 use anyhow::*;
 
-pub fn part1(slope: Vec<String>) -> Result<u64> {
-  Ok(count_trees(3, 1, &slope[..]))
+pub mod part1 {
+  use super::*;
+  pub fn solve(slope: Vec<String>) -> Result<u64> {
+    Ok(count_trees(3, 1, &slope[..]))
+  }  
 }
 
-pub fn part2(slope: Vec<String>) -> Result<u64> {
-  let slopes = &[
-    (1, 1),
-    (3, 1),
-    (5, 1),
-    (7, 1),
-    (1, 2)
-  ];
-
-  let mut product = 1;
-  for &(over, down) in slopes {
-    product *= count_trees(over, down, &slope[..]);
+pub mod part2 {
+  use super::*;
+  pub fn solve(slope: Vec<String>) -> Result<u64> {
+    let slopes = &[
+      (1, 1),
+      (3, 1),
+      (5, 1),
+      (7, 1),
+      (1, 2)
+    ];
+  
+    let mut product = 1;
+    for &(over, down) in slopes {
+      product *= count_trees(over, down, &slope[..]);
+    }
+    Ok(product)
   }
-  Ok(product)
 }
+
 
 fn count_trees(over: usize, down: usize, slope: &[String]) -> u64 {
   let width = slope[0].len();
