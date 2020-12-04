@@ -9,6 +9,15 @@ pub enum Opcode {
   Halt,
 }
 
+impl Opcode {
+  pub fn size(&self) -> usize {
+    match self {
+      Opcode::Mult { .. } | Opcode::Add { .. } => 4,
+      Opcode::Halt => 1,
+    }
+  }
+}
+
 macro_rules! binary_assign{
   ($opcode:ident, $memory:expr, $idx:expr) => {
     if let &[left, right, store] = &$memory[$idx+1..=$idx+3] {
@@ -19,14 +28,15 @@ macro_rules! binary_assign{
   }
 }
 
+#[derive(Clone)]
 pub struct Computer {
   pub instruction_pointer: Position,
   pub memory: Vec<Value>
 }
 
 impl Computer {
-  pub fn advance(&mut self) {
-    self.instruction_pointer += 4;
+  pub fn advance(&mut self, opcode: &Opcode) {
+    self.instruction_pointer += opcode.size();
   }
   pub fn next_opcode(&self) -> Result<Opcode> {
     let ip = self.instruction_pointer;
@@ -40,13 +50,15 @@ impl Computer {
   pub fn step(&mut self) -> Result<bool> {
     let next_opcode = self.next_opcode();
     let mem = &mut self.memory;
-    match next_opcode {
-      Ok(Opcode::Add { left, right, store }) => mem[store] = mem[left] + mem[right],
-      Ok(Opcode::Mult { left, right, store }) => mem[store] = mem[left] * mem[right],
+    match &next_opcode {
+      Ok(Opcode::Add { left, right, store }) => mem[*store] = mem[*left] + mem[*right],
+      Ok(Opcode::Mult { left, right, store }) => mem[*store] = mem[*left] * mem[*right],
       Ok(Opcode::Halt) => return Ok(false),
-      e@Err(_) => { e?; },
+      Err(_) => { bail!("Unrecognized opcode"); },
     }
-    self.advance();
+    if let Ok(opcode) = next_opcode {
+      self.advance(&opcode);
+    }
     return Ok(true);
   }
   pub fn run(&mut self) -> Result<()> {
@@ -103,7 +115,7 @@ mod tests {
   #[test]
   fn advance() {
     let mut comp: Computer = vec![1, 2, 3, 4, 5].into();
-    comp.advance();
+    comp.advance(&comp.next_opcode().unwrap());
     assert_eq!(5, comp.memory[comp.instruction_pointer]);
   }
 

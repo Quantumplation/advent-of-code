@@ -1,2 +1,2 @@
 mod intcode;
-pub use intcode::parse;
+pub use intcode::parse as intcode;
