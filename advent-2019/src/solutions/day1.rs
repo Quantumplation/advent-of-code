@@ -1,4 +1,3 @@
-use std::iter::Sum;
 use anyhow::*;
 
 pub mod part1 {
