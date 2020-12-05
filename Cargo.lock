@@ -17,6 +17,7 @@ dependencies = [
  "advent-shared",
  "anyhow",
  "matches",
+ "nom",
 ]
 
 [[package]]
