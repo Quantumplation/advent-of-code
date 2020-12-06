@@ -8,6 +8,7 @@ dependencies = [
  "anyhow",
  "matches",
  "nom",
+ "sorted-vec",
 ]
 
 [[package]]
@@ -117,6 +118,12 @@ name = "ryu"
 version = "1.0.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "71d301d4193d031abdd79ff7e3dd721168a9572ef3fe51a1517aba235bd8f86e"
+
+[[package]]
+name = "sorted-vec"
+version = "0.4.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "55cf6d6336200cf09cda5d9866868fd2176ad0e0b8e5fcd512bc7e7434cfb6a0"
 
 [[package]]
 name = "static_assertions"

@@ -7,7 +7,7 @@ pub mod part1 {
     let mut computer = computer;
     computer.memory[1] = 12;
     computer.memory[2] = 2;
-    computer.debug(1000)?;
+    computer.run()?;
     Ok(computer.memory[0])
   }
 }
