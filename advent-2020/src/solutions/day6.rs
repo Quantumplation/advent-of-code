@@ -4,7 +4,18 @@ use std::str::FromStr;
 pub mod part1 {
   use super::*;
   pub fn solve(groups: Vec<Group>) -> Result<u32> {
-    Ok(groups.iter().map(|g| fold_group(g)).map(|Answers(a)| u32::count_ones(a)).sum())
+    Ok(groups.iter().map(|g| fold_group_anyone(g)).map(|Answers(a)| u32::count_ones(a)).sum())
+  }
+}
+
+pub mod part2 {
+  use super::*;
+  pub fn solve(groups: Vec<Group>) -> Result<u32> {
+    Ok(groups.iter()
+      .map(|g| (g.people.len(), fold_group_everyone(g)))
+      .map(|(c, Answers(a))| u32::count_ones(a))
+      .sum()
+    )
   }
 }
 
@@ -50,10 +61,18 @@ impl FromStr for Group {
   }
 }
 
-pub fn fold_group(group: &Group) -> Answers {
+pub fn fold_group_anyone(group: &Group) -> Answers {
   let mut answers = 0;
   for Answers(a) in &group.people {
     answers |= a;
+  }
+  Answers(answers)
+}
+
+pub fn fold_group_everyone(group: &Group) -> Answers {
+  let mut answers = 0b11111111111111111111111111;
+  for Answers(a) in &group.people {
+    answers &= a;
   }
   Answers(answers)
 }
@@ -82,8 +101,14 @@ mod tests {
   }
 
   #[test]
-  fn test_fold() {
+  fn test_fold_anyone() {
     let group = "a\nab\nabc".parse::<Group>().unwrap();
-    assert_matches!(fold_group(&group), Answers(7))
+    assert_matches!(fold_group_anyone(&group), Answers(7))
+  }
+
+  #[test]
+  fn test_fold_everyone() {
+    let group = "a\nab\nabc".parse::<Group>().unwrap();
+    assert_matches!(fold_group_everyone(&group), Answers(1))
   }
 }
