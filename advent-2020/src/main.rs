@@ -19,6 +19,7 @@ fn main() -> Result<()> {
     println!("5.2) {:?}", run(2020, "day5.txt", vec_of,             day5::part2::solve));
     println!("6.1) {:?}", run(2020, "day6.txt", vec_of_blank_lines, day6::part1::solve));
     println!("6.2) {:?}", run(2020, "day6.txt", vec_of_blank_lines, day6::part2::solve));
+    println!("7.1) {:?}", run(2020, "day7.txt", vec_of,             day7::part1::solve));
 
     Ok(())
 }

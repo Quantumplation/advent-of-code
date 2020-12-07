@@ -66,7 +66,7 @@ impl Computer {
     Ok(())
   }
 
-  pub fn debug(&mut self, limit: usize) -> Result<()> {
+  pub fn _debug(&mut self, limit: usize) -> Result<()> {
     let mut limit = limit;
     loop {
       println!("{}: {:?};  Next: {:?}", self.instruction_pointer, self.memory, self.next_opcode());
