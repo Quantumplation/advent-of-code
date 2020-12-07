@@ -1,4 +1,4 @@
-use std::{collections::HashSet, str::FromStr};
+use std::{collections::HashSet, str::FromStr, collections::HashMap};
 
 use anyhow::*;
 
@@ -7,6 +7,15 @@ pub mod part1 {
   pub fn solve(rules: Vec<Rule>) -> Result<usize> {
 
     Ok(can_eventually_contain_any(&rules, &vec!["shiny gold".to_string()]).len())
+  }
+}
+
+
+pub mod part2 {
+  use super::*;
+  pub fn solve(rules: Vec<Rule>) -> Result<u32> {
+
+    Ok(count_bags(&rules, "shiny gold".to_string()))
   }
 }
 
@@ -73,6 +82,33 @@ pub fn can_eventually_contain_any(rules: &Vec<Rule>, colors: &Vec<String>) -> Ha
   return hs;
 }
 
+pub fn expand_bags(rules: &Vec<Rule>, bags: &HashMap<String, u32>) -> HashMap<String,u32> {
+  let mut result = HashMap::new();
+  for (color, count) in bags {
+    let rule = rules.iter().find(|&r| r.color == color.clone()).unwrap();
+    for (count_inner, color) in &rule.contains {
+      *(result.entry(color.clone()).or_insert(0)) += count * count_inner;
+    }
+  }
+  return result;
+}
+
+pub fn count_bags(rules: &Vec<Rule>, bag: String) -> u32 {
+  let mut count = 0u32;
+  let mut hm = HashMap::new();
+  hm.insert(bag, 1);
+  loop {
+    let expanded = expand_bags(&rules, &hm);
+    let sum: u32 = expanded.iter().map(|(_,&v)| v).sum();
+    if sum == 0 {
+      break;
+    }
+    count += sum;
+    hm = expanded;
+  }
+  return count;
+}
+
 #[cfg(test)]
 mod tests {
 
@@ -128,5 +164,38 @@ mod tests {
     ];
     let rules = rules.iter().map(|&s| s.parse::<Rule>().unwrap()).collect();
     assert_eq!(4, can_eventually_contain_any(&rules, &vec!["shiny gold".to_string()]).len());
+  }
+
+  #[test]
+  fn count_bags_test() {
+    let rules = vec![
+      "light red bags contain 1 bright white bag, 2 muted yellow bags.",
+      "dark orange bags contain 3 bright white bags, 4 muted yellow bags.",
+      "bright white bags contain 1 shiny gold bag.",
+      "muted yellow bags contain 2 shiny gold bags, 9 faded blue bags.",
+      "shiny gold bags contain 1 dark olive bag, 2 vibrant plum bags.",
+      "dark olive bags contain 3 faded blue bags, 4 dotted black bags.",
+      "vibrant plum bags contain 5 faded blue bags, 6 dotted black bags.",
+      "faded blue bags contain no other bags.",
+      "dotted black bags contain no other bags."
+    ];
+    let rules = rules.iter().map(|&s| s.parse::<Rule>().unwrap()).collect();
+    assert_eq!(32, count_bags(&rules, "shiny gold".to_string()));
+  }
+
+  #[test]
+  fn count_bags_test2() {
+    let rules = vec![
+      "shiny gold bags contain 2 dark red bags.",
+      "dark red bags contain 2 dark orange bags.",
+      "dark orange bags contain 2 dark yellow bags.",
+      "dark yellow bags contain 2 dark green bags.",
+      "dark green bags contain 2 dark blue bags.",
+      "dark blue bags contain 2 dark violet bags.",
+      "dark violet bags contain no other bags."
+    ];
+    let rules = rules.iter().map(|&s| s.parse::<Rule>().unwrap()).collect();
+    assert_eq!(126, count_bags(&rules, "shiny gold".to_string()));
+
   }
 }
