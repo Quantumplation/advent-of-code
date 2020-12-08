@@ -10,12 +10,32 @@ pub mod part1 {
     return Ok(machine.accumulator)
   }
 }
+pub mod part2 {
+  use super::*;
+  pub fn solve(instr: Vec<Opcode>) -> Result<i32> {
+    let mut corrupted = 0;
+    loop {
+      let mut this_run = instr.clone();
+      match &this_run[corrupted] {
+        &Opcode::Acc(_) => { corrupted += 1; continue; },
+        &Opcode::Jump(x) => { this_run[corrupted] = Opcode::Nop(x); },
+        &Opcode::Nop(x) => { this_run[corrupted] = Opcode::Jump(x); },
+      }
+      let mut machine = Machine::new(this_run);
+      match machine.run() {
+        RunResult::Terminated => return Ok(machine.accumulator),
+        RunResult::Diverged => { corrupted += 1; continue; },
+        _ => panic!()
+      }
+    }
+  }
+}
 
 #[derive(Clone, Debug)]
 pub enum Opcode {
   Acc(i32),
   Jump(i32),
-  Nop,
+  Nop(i32),
 }
 
 impl FromStr for Opcode {
@@ -23,11 +43,11 @@ impl FromStr for Opcode {
 
   fn from_str(s: &str) -> Result<Self, Self::Err> {
     let mut split = s.split(' ');
-    let (op, count) = (split.next().unwrap(), split.next());
+    let (op, count) = (split.next().unwrap(), split.next().unwrap().parse::<i32>().unwrap());
     Ok(match op {
-      "acc" => Opcode::Acc(count.unwrap().parse::<i32>().unwrap()),
-      "jmp" => Opcode::Jump(count.unwrap().parse::<i32>().unwrap()),
-      "nop" => Opcode::Nop,
+      "acc" => Opcode::Acc(count),
+      "jmp" => Opcode::Jump(count),
+      "nop" => Opcode::Nop(count),
       _ => panic!()
     })
   }
@@ -63,7 +83,7 @@ impl Machine {
     match &self.instructions[self.instruction_pointer] {
       &Opcode::Acc(x) => { self.accumulator += x; self.instruction_pointer += 1; },
       &Opcode::Jump(x) => { if x < 0 { self.instruction_pointer -= x.abs() as usize } else { self.instruction_pointer += x as usize } },
-      Opcode::Nop => { self.instruction_pointer += 1; }
+      Opcode::Nop(_) => { self.instruction_pointer += 1; }
     }
     return RunResult::Running;
   }
@@ -108,7 +128,7 @@ mod tests {
   #[test]
   fn run_test() {
     let instrs = vec![
-      Opcode::Nop,
+      Opcode::Nop(0),
       Opcode::Acc(1),
       Opcode::Jump(4),
       Opcode::Acc(3),
@@ -121,5 +141,23 @@ mod tests {
     let mut machine = Machine::new(instrs);
     assert_matches!(machine.run(), RunResult::Diverged);
     assert_eq!(5, machine.accumulator);
+  }
+
+  #[test]
+  fn terminate_test() {
+    let instrs = vec![
+      Opcode::Nop(0),
+      Opcode::Acc(1),
+      Opcode::Jump(4),
+      Opcode::Acc(3),
+      Opcode::Jump(-3),
+      Opcode::Acc(-99),
+      Opcode::Acc(1),
+      Opcode::Nop(-4),
+      Opcode::Acc(6),
+    ];
+    let mut machine = Machine::new(instrs);
+    assert_matches!(machine.run(), RunResult::Terminated);
+    assert_eq!(8, machine.accumulator);
   }
 }
