@@ -22,6 +22,7 @@ pub mod part2 {
 }
 
 pub fn find_chain(joltages: &mut Vec<u64>) {
+  // A "valid chain" of adapters is just the list in order
   joltages.sort();
 }
 
@@ -62,6 +63,18 @@ pub fn count_options(joltages: &Vec<u64>) -> u64 {
 
 #[cfg(test)]
 mod tests {
+  use super::*;
   #[test]
-  fn success() {}
+  fn count_differences_test() {
+    assert_eq!((1,1), count_differences(&vec![1]));
+    assert_eq!((2,1), count_differences(&vec![1,2]));
+    assert_eq!((1,2), count_differences(&vec![1,4]));
+    assert_eq!((7,5), count_differences(&vec![1, 4, 5, 6, 7, 10, 11, 12, 15, 16, 19]));
+  }
+
+  #[test]
+  fn count_options_test() {
+    assert_eq!(8, count_options(&vec![0, 1, 4, 5, 6, 7, 10, 11, 12, 15, 16, 19, 22]));
+    assert_eq!(19208, count_options(&vec![0, 1, 2, 3, 4, 7, 8, 9, 10, 11, 14, 17, 18, 19, 20, 23, 24, 25, 28, 31, 32, 33, 34, 35, 38, 39, 42, 45, 46, 47, 48, 49, 52]));
+  }
 }
