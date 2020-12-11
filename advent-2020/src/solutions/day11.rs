@@ -5,7 +5,15 @@ pub mod part1 {
   use super::*;
   pub fn solve(waiting_room: WaitingRoom) -> Result<u64> {
     let mut waiting_room = waiting_room;
-    waiting_room.fixed_point();
+    waiting_room.fixed_point(false);
+    Ok(waiting_room.count_occupied())
+  }
+}
+pub mod part2 {
+  use super::*;
+  pub fn solve(waiting_room: WaitingRoom) -> Result<u64> {
+    let mut waiting_room = waiting_room;
+    waiting_room.fixed_point(true);
     Ok(waiting_room.count_occupied())
   }
 }
@@ -71,19 +79,53 @@ impl WaitingRoom {
     neighborhood.iter().map(|&s| if matches!(s, Spot::Occupied) { 1 } else { 0 }).sum()
   }
 
-  pub fn step(&mut self) -> bool {
+  pub fn sum_occupied_visible_neighborhood(&self, row: usize, col: usize) -> u32 {
+    let (row, col) = (row as isize, col as isize);
+    let mut total = 0;
+    let directions = vec![
+      (-1,-1), (-1, 0), (-1,  1),
+      ( 0,-1), ( 0, 0), ( 0,  1),
+      ( 1,-1), ( 1, 0), ( 1,  1)
+    ];
+    for dir in directions {
+      if dir == (0,0) {
+        continue;
+      }
+
+      let mut curr = (row, col);
+      loop {
+        curr = (curr.0 + dir.0, curr.1 + dir.1);
+        if curr.0 < 0 || curr.0 as usize >= self.spots.len() { break; }
+        let row = &self.spots[curr.0 as usize];
+        if curr.1 < 0 || curr.1 as usize >= row.len() { break; }
+        match row[curr.1 as usize] {
+          Spot::Floor => { continue; }
+          Spot::Empty => { break; }
+          Spot::Occupied => { total += 1; break; }
+        }
+      }
+    }
+    total
+  }
+
+  pub fn step(&mut self, part2: bool) -> bool {
     let mut new_spots = vec![];
     let mut changed = false;
     for (r, row) in self.spots.iter().enumerate() {
       let mut new_row = vec![];
       for (c, _) in row.iter().enumerate() {
-        let nbhd_sum = self.sum_occupied_neighborhood(r, c);
+        let nbhd_sum = if part2 {
+          self.sum_occupied_visible_neighborhood(r, c)
+        } else {
+          self.sum_occupied_neighborhood(r, c)
+        };
+        let overpopulation = if part2 { 5 } else { 4 };
         match self.get(r as isize,c as isize) {
           Spot::Empty if nbhd_sum == 0 => {
             new_row.push(Spot::Occupied);
             changed = true;
           },
-          Spot::Occupied if nbhd_sum >= 4 => {
+          Spot::Occupied if nbhd_sum >= overpopulation => {
             new_row.push(Spot::Empty);
             changed = true;
           },
@@ -96,8 +138,8 @@ impl WaitingRoom {
     return changed;
   }
 
-  pub fn fixed_point(&mut self) {
-    while self.step() {}
+  pub fn fixed_point(&mut self, part_2: bool) {
+    while self.step(part_2) {}
   }
 
   pub fn count_occupied(&self) -> u64 {
