@@ -30,33 +30,43 @@ pub fn count_differences(joltages: &Vec<u64>) -> (u32, u32) {
   let mut ones = 0;
   let mut threes = 0;
   let mut prev = 0;
+  // Count up jumps of 1s and 3s
   for number in &joltages[..] {
-    if number - prev == 1 {
-      ones += 1;
-    }
-    if number - prev == 3 {
-      threes += 1;
+    match number - prev {
+      1 => { ones += 1 },
+      3 => { threes += 1 },
+      _ => {}
     }
     prev = *number;
   }
+  // Add one for the jump to the laptop at the end, which is always 3
   return (ones, threes + 1);
 }
 
 pub fn count_options(joltages: &Vec<u64>) -> u64 {
+  // Count the number of paths to each number
   let mut paths = vec![0; joltages.len()];
+  // We can reach "0" (the wall) via one path
   paths[0] = 1;
   for (idx, number) in joltages.iter().enumerate() {
+    // We know how many paths it takes to get to `number`,
+    // so any numbers we can reach from this one
+    // are also reachable via those paths
+    // So we add `paths_to_here` to those reachable numbers.
     let paths_to_here = paths[idx];
-    for next in 1..=3 {
-      if idx + next >= joltages.len() {
+    for next in idx+1..=idx+3 {
+      // Make sure we don't index past the end of the array
+      if next >= joltages.len() {
         break;
       }
-      if joltages[idx + next] > number + 3 {
+      // and break early if the number is greater than 3 plus this one
+      if joltages[next] > number + 3 {
         break;
       }
-      paths[idx + next] += paths_to_here;
+      paths[next] += paths_to_here;
     }
   }
+  // How many paths can reach the last node?
   return paths[joltages.len() - 1];
 }
 
