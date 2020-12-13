@@ -31,6 +31,8 @@ fn main() -> Result<()> {
     println!("11.2) {:?}", run(2020, "day11.txt", identity,         day11::part2::solve));
     println!("12.1) {:?}", run(2020, "day12.txt", vec_of,         day12::part1::solve));
     println!("12.2) {:?}", run(2020, "day12.txt", vec_of,         day12::part2::solve));
+    println!("13.1) {:?}", run(2020, "day13.txt", identity,         day13::part1::solve));
+    println!("13.2) {:?}", run(2020, "day13.txt", identity,         day13::part2::solve));
 
     Ok(())
 }
