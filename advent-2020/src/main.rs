@@ -29,12 +29,14 @@ fn main() -> Result<()> {
     println!("10.2) {:?}", run(2020, "day10.txt", vec_of,           day10::part2::solve));
     println!("11.1) {:?}", run(2020, "day11.txt", identity,         day11::part1::solve));
     println!("11.2) {:?}", run(2020, "day11.txt", identity,         day11::part2::solve));
-    println!("12.1) {:?}", run(2020, "day12.txt", vec_of,         day12::part1::solve));
-    println!("12.2) {:?}", run(2020, "day12.txt", vec_of,         day12::part2::solve));
+    println!("12.1) {:?}", run(2020, "day12.txt", vec_of,           day12::part1::solve));
+    println!("12.2) {:?}", run(2020, "day12.txt", vec_of,           day12::part2::solve));
     println!("13.1) {:?}", run(2020, "day13.txt", identity,         day13::part1::solve));
     println!("13.2) {:?}", run(2020, "day13.txt", identity,         day13::part2::solve));
-    println!("14.1) {:?}", run(2020, "day14.txt", vec_of,             day14::part1::solve));
-    println!("14.2) {:?}", run(2020, "day14.txt", vec_of,             day14::part2::solve));
+    println!("14.1) {:?}", run(2020, "day14.txt", vec_of,           day14::part1::solve));
+    println!("14.2) {:?}", run(2020, "day14.txt", vec_of,           day14::part2::solve));
+    println!("15.1) {:?}", run(2020, "day15.txt", vec_of_commas,    day15::part1::solve));
+    println!("15.2) {:?}", run(2020, "day15.txt", vec_of_commas,    day15::part2::solve));
 
     Ok(())
 }
