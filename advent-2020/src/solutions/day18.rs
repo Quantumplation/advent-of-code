@@ -3,6 +3,12 @@ use std::{collections::VecDeque, str::FromStr};
 
 pub mod part1 {
   use super::*;
+  pub fn solve(_: Vec<AST>) -> Result<u64> {
+    bail!("Part 1 incompatible with Part 2")
+  }
+}
+pub mod part2 {
+  use super::*;
   pub fn solve(expressions: Vec<AST>) -> Result<u64> {
     Ok(expressions.iter().map(|e| e.evaluate()).sum())
   }
@@ -26,6 +32,27 @@ pub enum AST {
   Op(Operator),
   Literal(u64),
   Binary { op: Operator, left: Box<AST>, right: Box<AST> }
+}
+
+fn fold(tokens: &mut VecDeque<AST>) -> AST {
+  loop {
+    if tokens.len() == 1 {
+      return tokens.pop_back().unwrap();
+    }
+
+    let left = tokens.pop_front().unwrap();
+    let op = if let Some(AST::Op(op)) = tokens.pop_front() { op } else { panic!() };
+    match op {
+      Operator::Plus => {
+        let right = tokens.pop_front().unwrap();
+        tokens.push_front(AST::Binary { op, left: Box::new(left), right: Box::new(right) });
+      },
+      Operator::Multiply => {
+        let right = fold(tokens);
+        tokens.push_front(AST::Binary { op, left: Box::new(left), right: Box::new(right)});
+      }
+    }
+  }
 }
 
 impl AST {
@@ -76,20 +103,7 @@ impl AST {
         break;
       }
     }
-    loop {
-      if stack.len() == 1 {
-        return (stack.pop_front().unwrap(), idx);
-      }
-      if let (left, AST::Op(op), right) = (
-        stack.pop_front().unwrap(),
-        stack.pop_front().unwrap(),
-        stack.pop_front().unwrap()
-      ) {
-        stack.push_front(AST::Binary { op, left: Box::from(left), right: Box::from(right) });
-      } else {
-        panic!();
-      }
-    }
+    return (fold(&mut stack), idx);
   }
   pub fn print(&self) -> String {
     match self {
@@ -120,5 +134,11 @@ mod tests {
     assert_eq!(3, tree.evaluate());
     let tree = "(1 + ((20 + 3) + 4)) + 3".parse::<AST>().unwrap();
     assert_eq!(31, tree.evaluate());
+  }
+
+  #[test]
+  fn add_precedence() {
+    let tree = "1 + 2 * 3 + 4 * 5 + 6".parse::<AST>().unwrap();
+    assert_eq!(231, tree.evaluate());
   }
 }
