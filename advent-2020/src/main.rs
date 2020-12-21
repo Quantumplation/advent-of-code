@@ -1,3 +1,4 @@
+#[feature(iterator_fold_self)]
 mod parsers;
 mod solutions;
 
@@ -47,6 +48,7 @@ fn main() -> Result<()> {
     println!("19.2) {:?}", run(2020, "day19.txt", identity,         day19::part2::solve));
     println!("20.1) {:?}", run(2020, "day20.txt", identity,         day20::part1::solve));
     println!("20.2) {:?}", run(2020, "day20.txt", identity,         day20::part2::solve));
+    println!("21.1) {:?}", run(2020, "day21.txt", identity,         day21::part1::solve));
 
     Ok(())
 }
