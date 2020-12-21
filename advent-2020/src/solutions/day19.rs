@@ -156,11 +156,7 @@ impl Input {
         return reachable_offsets.contains(&input.len());
     }
     pub fn count_satisfying(&self) -> usize {
-        let mut total = 0;
-        for m in self.messages.iter().filter(|&s| self.satisfies(s)) {
-            total += 1;
-        }
-        return total;
+        self.messages.iter().filter(|&s| self.satisfies(s)).count()
     }
 }
 
@@ -217,12 +213,6 @@ mod tests {
                           aaabbb
                           aaaabbb";
         let input = input.parse::<Input>().unwrap();
-        let simple = input.rules.get(&4).unwrap();
-        // assert_eq!((true, 1), simple.rules.satisfies("a", &input.rules, 0));
-        // assert_eq!((false, 1), simple.rules.satisfies("b", &input.rules, 0));
-        // let complex = input.rules.get(&2).unwrap();
-        // assert_eq!((true, 2), complex.rules.satisfies("aa", &input.rules, 0));
-        // assert_eq!((true, 2), complex.rules.satisfies("bb", &input.rules, 0));
         assert!(input.satisfies("aaaabb"));
         assert_eq!(false, input.satisfies("baaabb"));
 

@@ -105,6 +105,7 @@ impl AST {
     }
     return (fold(&mut stack), idx);
   }
+  #[allow(dead_code)]
   pub fn print(&self) -> String {
     match self {
       AST::Literal(x) => { format!("{}", x) }

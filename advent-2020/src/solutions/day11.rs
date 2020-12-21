@@ -157,7 +157,6 @@ impl WaitingRoom {
 
 #[cfg(test)]
 mod tests {
-  use super::*;
   #[test]
   fn success() {
 

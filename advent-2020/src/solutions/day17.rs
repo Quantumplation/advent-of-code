@@ -70,8 +70,6 @@ impl PocketDimension {
   }
 
   // TODO: support other dimensions
-  pub const EXPAND_2D: (bool, bool, bool, bool) = (true, true, false, false);
-  pub const EXPAND_3D: (bool, bool, bool, bool) = (true, true, true, false);
   pub const EXPAND_4D: (bool, bool, bool, bool) = (true, true, true, true);
 
   pub fn set(&mut self, (x,y,z,w): (i32, i32, i32, i32), val: bool, (expand_x, expand_y, expand_z, expand_w): (bool, bool, bool, bool)) {
@@ -173,10 +171,10 @@ impl PocketDimension {
 
   pub fn step(&mut self, dim: (bool, bool, bool, bool)) -> Self {
     let mut next_step = self.clone();
-    let (sizeX, sizeY, sizeZ, sizeW) = (self.size.0 as i32, self.size.1 as i32, self.size.2 as i32, self.size.3 as i32);
-    let (offX, offY, offZ, offW) = (self.offsets.0, self.offsets.1, self.offsets.2, self.offsets.3);
-    let (minx, miny, minz, minw) = (offX, offY, offZ, offW);
-    let (maxx, maxy, maxz, maxw) = (sizeX + offX, sizeY + offY, sizeZ + offZ, sizeW + offW);
+    let (size_x, size_y, size_z, size_w) = (self.size.0 as i32, self.size.1 as i32, self.size.2 as i32, self.size.3 as i32);
+    let (off_x, off_y, off_z, off_w) = (self.offsets.0, self.offsets.1, self.offsets.2, self.offsets.3);
+    let (minx, miny, minz, minw) = (off_x, off_y, off_z, off_w);
+    let (maxx, maxy, maxz, maxw) = (size_x + off_x, size_y + off_y, size_z + off_z, size_w + off_w);
 
     for x in minx..maxx {
       for y in miny..maxy {
@@ -199,11 +197,12 @@ impl PocketDimension {
     return next_step;
   }
 
+  #[allow(dead_code)]
   pub fn print(&self) {
-    let (sizeX, sizeY, sizeZ, sizeW) = (self.size.0 as i32, self.size.1 as i32, self.size.2 as i32, self.size.3 as i32);
-    let (offX, offY, offZ, offW) = (self.offsets.0, self.offsets.1, self.offsets.2, self.offsets.3);
-    let (minx, miny, minz, minw) = (offX, offY, offZ, offW);
-    let (maxx, maxy, maxz, maxw) = (sizeX + offX, sizeY + offY, sizeZ + offZ, sizeW + offW);
+    let (size_x, size_y, size_z, size_w) = (self.size.0 as i32, self.size.1 as i32, self.size.2 as i32, self.size.3 as i32);
+    let (off_x, off_y, off_z, off_w) = (self.offsets.0, self.offsets.1, self.offsets.2, self.offsets.3);
+    let (minx, miny, minz, minw) = (off_x, off_y, off_z, off_w);
+    let (maxx, maxy, maxz, maxw) = (size_x + off_x, size_y + off_y, size_z + off_z, size_w + off_w);
 
     for z in minz..maxz {
       println!("z = {}", z);
@@ -222,11 +221,12 @@ impl PocketDimension {
     }
   }
 
+  #[allow(dead_code)]
   pub fn print_neighbors(&self) {
-    let (sizeX, sizeY, sizeZ, sizeW) = (self.size.0 as i32, self.size.1 as i32, self.size.2 as i32, self.size.3 as i32);
-    let (offX, offY, offZ, offW) = (self.offsets.0, self.offsets.1, self.offsets.2, self.offsets.3);
-    let (minx, miny, minz, minw) = (offX, offY, offZ, offW);
-    let (maxx, maxy, maxz, maxw) = (sizeX + offX, sizeY + offY, sizeZ + offZ, sizeW + offW);
+    let (size_x, size_y, size_z, size_w) = (self.size.0 as i32, self.size.1 as i32, self.size.2 as i32, self.size.3 as i32);
+    let (off_x, off_y, off_z, off_w) = (self.offsets.0, self.offsets.1, self.offsets.2, self.offsets.3);
+    let (minx, miny, minz, minw) = (off_x, off_y, off_z, off_w);
+    let (maxx, maxy, maxz, maxw) = (size_x + off_x, size_y + off_y, size_z + off_z, size_w + off_w);
 
     for z in minz..maxz {
       println!("z = {}", z);
@@ -247,10 +247,10 @@ impl PocketDimension {
 
   pub fn count_alive(&self) -> u32 {
     let mut sum = 0;
-    let (sizeX, sizeY, sizeZ, sizeW) = (self.size.0 as i32, self.size.1 as i32, self.size.2 as i32, self.size.3 as i32);
-    let (offX, offY, offZ, offW) = (self.offsets.0, self.offsets.1, self.offsets.2, self.offsets.3);
-    let (minx, miny, minz, minw) = (offX, offY, offZ, offW);
-    let (maxx, maxy, maxz, maxw) = (sizeX + offX, sizeY + offY, sizeZ + offZ, sizeW + offW);
+    let (size_x, size_y, size_z, size_w) = (self.size.0 as i32, self.size.1 as i32, self.size.2 as i32, self.size.3 as i32);
+    let (off_x, off_y, off_z, off_w) = (self.offsets.0, self.offsets.1, self.offsets.2, self.offsets.3);
+    let (minx, miny, minz, minw) = (off_x, off_y, off_z, off_w);
+    let (maxx, maxy, maxz, maxw) = (size_x + off_x, size_y + off_y, size_z + off_z, size_w + off_w);
 
     for x in minx..maxx {
       for y in miny..maxy {

@@ -64,6 +64,7 @@ impl Tile {
       " #  #  #  #  #  #   \n";
     input.parse::<Tile>().unwrap()
   }
+  #[allow(dead_code)]
   pub fn print(&self) {
     for row in &self.photons {
       for p in row {
@@ -193,7 +194,6 @@ impl Tile {
 
     let mut seamonster_spots = HashSet::new();
     let mut correct_orientation_found = false;
-    let mut found = 0;
     for orientation in distinct_orientations {
       // Search for the pattern
       // The top left corner can start at (0,0), and
@@ -218,7 +218,6 @@ impl Tile {
           }
           if matched {
             correct_orientation_found = true;
-            found += 1;
             // Take all those spots, and merge it into our overall seamonster spots
             seamonster_spots.extend(potential_spots);
           }
@@ -306,10 +305,10 @@ impl ArrangedMap {
       queue.push_back(tile);
     }
 
-    let min_x = layout.keys().map(|(x,y)| *x).min().unwrap();
-    let max_x = layout.keys().map(|(x,y)| *x).max().unwrap();
-    let min_y = layout.keys().map(|(x,y)| *y).min().unwrap();
-    let max_y = layout.keys().map(|(x,y)| *y).max().unwrap();
+    let min_x = layout.keys().map(|(x,_)| *x).min().unwrap();
+    let max_x = layout.keys().map(|(x,_)| *x).max().unwrap();
+    let min_y = layout.keys().map(|(_,y)| *y).min().unwrap();
+    let max_y = layout.keys().map(|(_,y)| *y).max().unwrap();
     let dim = (max_x - min_x + 1, max_y - min_y + 1);
     let dim = (dim.0 as usize, dim.1 as usize);
 

@@ -116,6 +116,7 @@ pub fn is_any_satisfied(input: u32, rules: &Vec<TicketRule>) -> bool {
   return rules.iter().any(|r| is_satisfied(input, r));
 }
 
+#[allow(dead_code)]
 pub fn valid_rules(inputs: Vec<u32>, rules: &Vec<TicketRule>) -> HashSet<usize> {
   let mut valid_rules = HashSet::from_iter(0..rules.len() - 1);
 
