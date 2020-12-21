@@ -46,6 +46,7 @@ fn main() -> Result<()> {
     println!("19.1) {:?}", run(2020, "day19.txt", identity,         day19::part1::solve));
     println!("19.2) {:?}", run(2020, "day19.txt", identity,         day19::part2::solve));
     println!("20.1) {:?}", run(2020, "day20.txt", identity,         day20::part1::solve));
+    println!("20.2) {:?}", run(2020, "day20.txt", identity,         day20::part2::solve));
 
     Ok(())
 }
