@@ -7,9 +7,6 @@ use solutions::*;
 use anyhow::*;
 
 fn main() -> Result<()> {
-    println!("19.1) {:?}", run(2020, "day19.txt", identity,         day19::part1::solve));
-    println!("19.2) {:?}", run(2020, "day19.txt", identity,         day19::part2::solve));
-    return Ok(());
     println!("1.1) {:?}", run(2020, "day1.txt", vec_of,             day1::part1::solve));
     println!("1.2) {:?}", run(2020, "day1.txt", vec_of,             day1::part2::solve));
     println!("2.1) {:?}", run(2020, "day2.txt", vec_of,             day2::part1::solve));
@@ -44,8 +41,11 @@ fn main() -> Result<()> {
     println!("16.2) {:?}", run(2020, "day16.txt", identity,         day16::part2::solve));
     println!("17.1) {:?}", run(2020, "day17.txt", identity,         day17::part1::solve));
     println!("17.2) {:?}", run(2020, "day17.txt", identity,         day17::part2::solve));
-    println!("18.1) {:?}", run(2020, "day18.txt", vec_of,         day18::part1::solve));
-    println!("18.2) {:?}", run(2020, "day18.txt", vec_of,         day18::part2::solve));
+    println!("18.1) {:?}", run(2020, "day18.txt", vec_of,           day18::part1::solve));
+    println!("18.2) {:?}", run(2020, "day18.txt", vec_of,           day18::part2::solve));
+    println!("19.1) {:?}", run(2020, "day19.txt", identity,         day19::part1::solve));
+    println!("19.2) {:?}", run(2020, "day19.txt", identity,         day19::part2::solve));
+    println!("20.1) {:?}", run(2020, "day20.txt", identity,         day20::part1::solve));
 
     Ok(())
 }
