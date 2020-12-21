@@ -17,6 +17,22 @@ pub mod part1 {
   }
 }
 
+pub mod part2 {
+  use super::*;
+  use anyhow::*;
+  pub fn solve(input: Input) -> Result<String> {
+    let allergens_to_ingredients = input.allergen_to_ingredients();
+    let mut keys: Vec<_> = allergens_to_ingredients.keys().collect();
+    keys.sort();
+    let mut canonical = String::new();
+    for key in keys {
+      canonical += allergens_to_ingredients.get(key).unwrap();
+      canonical += ",";
+    }
+    return Ok(canonical[..canonical.len() - 1].to_string());
+  }
+}
+
 pub struct Food {
   ingredients: HashSet<String>,
   allergens: HashSet<String>,
@@ -59,28 +75,65 @@ impl FromStr for Input {
 }
 
 impl Input {
-  pub fn safe_ingredients(&self) -> HashSet<String> {
+  pub fn all_ingredients(&self) -> HashSet<String> {
+    self.foods.iter()
+    .map(|f| &f.ingredients)
+    .fold(HashSet::new(),
+          |mut ing, i| {
+            ing.extend(i.clone());
+            ing
+          })
+  }
+  pub fn possible_ingredients(&self) -> HashMap<String, HashSet<String>> {
     let mut possible_ingredients = HashMap::<String, HashSet::<String>>::new();
-    let ingredients = self.foods.iter()
-      .map(|f| &f.ingredients)
-      .fold(HashSet::new(),
-            |mut ing, i| {
-              ing.extend(i.clone());
-              ing
-            });
+    let ingredients = self.all_ingredients();
     for food in &self.foods {
       for allergen in &food.allergens {
         let hs = possible_ingredients.remove(allergen).unwrap_or_else(|| ingredients.clone());
         possible_ingredients.insert(allergen.clone(), hs.intersection(&food.ingredients).cloned().collect());
       }
     }
-
-    let mut safe_ingredients = ingredients.clone();
+    return possible_ingredients;
+  }
+  pub fn safe_ingredients(&self) -> HashSet<String> {
+    let possible_ingredients = self.possible_ingredients();
+    let mut safe_ingredients = self.all_ingredients();
     for (_allergen, ingredients) in possible_ingredients {
       safe_ingredients = safe_ingredients.difference(&ingredients).cloned().collect();
     }
 
     return safe_ingredients;
+  }
+  pub fn allergen_to_ingredients(&self) -> HashMap<String, String> {
+    let mut possible_ingredients = self.possible_ingredients();
+    let mut allergen_to_ingredient_map = HashMap::new();
+
+    loop {
+      if possible_ingredients.is_empty() {
+        break;
+      }
+
+      let mut chosen_ingredient = None;
+      for (allergen, possible_ingredients) in &possible_ingredients {
+        if possible_ingredients.len() == 1 {
+          let ingredient = possible_ingredients.iter().next().unwrap().clone();
+          allergen_to_ingredient_map.insert(allergen.clone(), ingredient.clone());
+          chosen_ingredient = Some(ingredient);
+          break;
+        }
+      }
+      if let Some(ingredient) = chosen_ingredient {
+        let keys: Vec<_> = possible_ingredients.keys().cloned().collect();
+        for allergen in keys {
+          possible_ingredients.get_mut(&allergen).unwrap().remove(&ingredient);
+        }
+        possible_ingredients.retain(|_, v| !v.is_empty());
+      } else {
+        panic!("infinite loop?");
+      }
+    }
+
+    return allergen_to_ingredient_map;
   }
 }
 
