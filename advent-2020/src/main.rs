@@ -50,6 +50,7 @@ fn main() -> Result<()> {
     println!("20.2) {:?}", run(2020, "day20.txt", identity,         day20::part2::solve));
     println!("21.1) {:?}", run(2020, "day21.txt", identity,         day21::part1::solve));
     println!("21.2) {:?}", run(2020, "day21.txt", identity,         day21::part2::solve));
+    println!("22.1) {:?}", run(2020, "day22.txt", identity,         day22::part1::solve));
 
     Ok(())
 }
