@@ -12,6 +12,19 @@ pub mod part1 {
     }
 }
 
+pub mod part2 {
+    use super::*;
+    use anyhow::*;
+    pub fn solve(paths: Vec<Path>) -> Result<u32> {
+        let mut grid = HexagonalGrid::new();
+        for path in &paths {
+            grid.flip(path);
+        }
+        grid.step_n(100);
+        Ok(grid.count_black())
+    }
+}
+
 #[derive(Debug)]
 pub enum Direction {
     East,
@@ -167,6 +180,44 @@ impl HexagonalGrid {
         }
         return total;
     }
+
+    pub fn step(&mut self) {
+        let neighbors = &[Direction::East, Direction::West, Direction::Northeast, Direction::Southwest, Direction::Northwest, Direction::Southeast];
+        let mut neighbor_counts = HashMap::<HexagonalCoord, u32>::new();
+        for (coord, color) in &self.tiles {
+            if *color {
+                for n in neighbors {
+                    let n = coord.step(n);
+                    if neighbor_counts.contains_key(&n) {
+                        let c = neighbor_counts.get_mut(&n).unwrap();
+                        *c += 1;
+                    } else {
+                        neighbor_counts.insert(n, 1);
+                    }
+                }
+            }
+        }
+        let mut new_tiles: HashMap<HexagonalCoord, bool> = HashMap::new();
+        for (coord, count) in neighbor_counts {
+            let current = self.tiles.entry(coord.clone()).or_default().clone();
+            if current && count == 0 || count > 2 {
+                new_tiles.insert(coord, false);
+            } else if !current && count == 2 {
+                new_tiles.insert(coord, true);
+            } else if current {
+                new_tiles.insert(coord, true);
+            }
+        }
+        self.tiles = new_tiles;
+    }
+
+    pub fn step_n(&mut self, n: u32) {
+        println!("Count: {}", self.count_black());
+        for _ in 0..n {
+            self.step();
+            println!("Count: {}", self.count_black());
+        }
+    }
 }
 
 #[cfg(test)]
@@ -217,5 +268,7 @@ wseweeenwnesenwwwswnew".lines().map(|s| s.parse::<Path>().unwrap()).collect();
             grid.flip(&p);
         }
         assert_eq!(10, grid.count_black());
+        grid.step_n(100);
+        assert_eq!(2208, grid.count_black());
     }
 }
