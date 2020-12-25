@@ -212,10 +212,8 @@ impl HexagonalGrid {
     }
 
     pub fn step_n(&mut self, n: u32) {
-        println!("Count: {}", self.count_black());
         for _ in 0..n {
             self.step();
-            println!("Count: {}", self.count_black());
         }
     }
 }

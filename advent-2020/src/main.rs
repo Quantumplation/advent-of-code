@@ -56,6 +56,8 @@ fn main() -> Result<()> {
     println!("23.2) {:?}", run(2020, "day23.txt", raw,              day23::part2::solve));
     println!("24.1) {:?}", run(2020, "day24.txt", vec_of,           day24::part1::solve));
     println!("24.2) {:?}", run(2020, "day24.txt", vec_of,           day24::part2::solve));
+    println!("25.1) {:?}", run(2020, "day25.txt", vec_of,           day25::part1::solve));
+    println!("25.2) {:?}", run(2020, "day25.txt", vec_of,           day25::part2::solve));
 
     Ok(())
 }
