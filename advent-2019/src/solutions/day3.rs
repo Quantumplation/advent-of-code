@@ -9,9 +9,29 @@ pub mod part1 {
   pub fn solve(wires: Vec<WireDescription>) -> Result<u32> {
     let (first, second) = (wires[0].clone(), wires[1].clone());
     let mut index = WireIndex::new(first.into());
-    let intersection = index.find_closest_intersection(second);
-    if let Some(intersection) = intersection {
-      return Ok(manhattan_distance(intersection));
+    let intersection = index.find_best_intersection(second, manhattan_distance);
+    if let Some((a, b)) = intersection {
+      return Ok(manhattan_distance(&a, &b));
+    } else {
+      bail!("No intersections!");
+    }
+  }
+}
+
+pub mod part2 {
+  use anyhow::*;
+  use super::*;
+
+  // NOTE(pi):
+  // This doesn't handle the following clause from the rules:
+  //  - If a wire visits a position on the grid multiple times, use the steps value from the first time it visits that position when calculating the total value of a specific intersection.
+  // This just happened not to come up in the input.
+  pub fn solve(wires: Vec<WireDescription>) -> Result<u32> {
+    let (first, second) = (wires[0].clone(), wires[1].clone());
+    let mut index = WireIndex::new(first.into());
+    let intersection = index.find_best_intersection(second, signal_delay);
+    if let Some((a, b)) = intersection {
+      return Ok(signal_delay(&a, &b));
     } else {
       bail!("No intersections!");
     }
@@ -21,11 +41,24 @@ pub mod part1 {
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub enum Direction { H, V }
 
-#[derive(Clone, Debug)]
+impl Default for Direction {
+    fn default() -> Self {
+        Direction::H
+    }
+}
+
+#[derive(Clone, Debug, Default)]
 pub struct Line {
   dir: Direction,
+  signal_delay: u32,
   c: i32,
   range: (i32, i32)
+}
+
+impl Line {
+  pub fn len(&self) -> u32 {
+    (self.range.0 - self.range.1).abs() as u32
+  }
 }
 
 impl PartialEq for Line {
@@ -52,12 +85,18 @@ pub enum Instruction {
 }
 
 impl Instruction {
-  pub fn follow(&self, (sx, sy): (i32, i32)) -> (Line, (i32, i32)) {
+  pub fn len(&self) -> u32 {
+    use Instruction::*;
+    match self {
+      Right(l) | Left(l) | Up(l) | Down(l) => l.abs() as u32,
+    }
+  }
+  pub fn follow(&self, signal_delay: u32, (sx, sy): (i32, i32)) -> (Line, (i32, i32)) {
     match &self {
-      Instruction::Right(x) => (Line { dir: Direction::H, c: sy, range: (sx, sx + x) }, (sx + x, sy)),
-      Instruction::Left(x) => (Line { dir: Direction::H, c: sy, range: (sx, sx - x) }, (sx - x, sy)),
-      Instruction::Up(y) => (Line { dir: Direction::V, c: sx, range: (sy, sy + y )}, (sx, sy + y)),
-      Instruction::Down(y) => (Line { dir: Direction::V, c: sx, range: (sy, sy - y )}, (sx, sy - y)),
+      Instruction::Right(x) => (Line { dir: Direction::H, signal_delay, c: sy, range: (sx, sx + x) }, (sx + x, sy)),
+      Instruction::Left(x) => (Line { dir: Direction::H, signal_delay, c: sy, range: (sx, sx - x) }, (sx - x, sy)),
+      Instruction::Up(y) => (Line { dir: Direction::V, signal_delay, c: sx, range: (sy, sy + y )}, (sx, sy + y)),
+      Instruction::Down(y) => (Line { dir: Direction::V, signal_delay, c: sx, range: (sy, sy - y )}, (sx, sy - y)),
     }
   }
 }
@@ -102,8 +141,10 @@ impl From<WireDescription> for Wire {
         
       let (mut cx, mut cy) = (0, 0);
       let mut segments = vec![];
+      let mut signal_delay = 0;
       for i in desc.instructions {
-        let (segment, (nx, ny)) = i.follow((cx, cy));
+        let (segment, (nx, ny)) = i.follow(signal_delay, (cx, cy));
+        signal_delay += segment.len();
         cx = nx;
         cy = ny;
         segments.push(segment);
@@ -147,10 +188,22 @@ struct WireIndex {
   vertical_lines: SplitVec<Line>,
   cx: i32,
   cy: i32,
+  signal_delay: u32,
 }
 
-pub fn manhattan_distance((x,y): (i32, i32)) -> u32 {
-  (x.abs() + y.abs()) as u32
+pub fn manhattan_distance(a: &Line, b: &Line) -> u32 {
+  //         |
+  // H: +----x--------+ (a.c, (a.range.0, a.range.1))
+  //         |
+  //         + (b.c, (b.range.0, b.range.1))
+  // The lines intersect at (a.c, b.c)
+  return (a.c.abs() + b.c.abs()) as u32
+}
+
+pub fn signal_delay(a: &Line, b: &Line) -> u32 {
+  let delay_for_a_at_point = a.signal_delay + (b.c - a.range.0).abs() as u32;
+  let delay_for_b_at_point = b.signal_delay + (a.c - b.range.0).abs() as u32;
+  return delay_for_a_at_point + delay_for_b_at_point;
 }
 
 impl WireIndex {
@@ -168,13 +221,15 @@ impl WireIndex {
       }
     }
     return WireIndex {
-      horizontal_lines: SplitVec::from(horizontal_lines, Line { dir: Direction::H, c: 0, range: (0, 0) }),
-      vertical_lines: SplitVec::from(vertical_lines, Line { dir: Direction::V, c: 0, range: (0, 0)}),
-      cx: 0, cy: 0,
+      horizontal_lines: SplitVec::from(horizontal_lines, Line { dir: Direction::H, signal_delay: 0, c: 0, range: (0, 0) }),
+      vertical_lines: SplitVec::from(vertical_lines, Line { dir: Direction::V, signal_delay: 0, c: 0, range: (0, 0)}),
+      cx: 0, cy: 0, signal_delay: 0,
     }
   }
 
-  pub fn ingest_instruction(&mut self, i: Instruction) -> Option<(i32, i32)> {
+  pub fn ingest_instruction<F>(&mut self, i: Instruction, metric: F) -> Option<(Line, Line)>
+    where
+      F: Fn(&Line, &Line) -> u32 {
     // Keep track of the closest intersection we've seen so far
     let mut closest = None;
 
@@ -189,6 +244,8 @@ impl WireIndex {
     let new_coord = match i { Left(_) | Down(_) => current_coord - dist, Right(_) | Up(_) => current_coord + dist };
     // If we're scanning "down" a list, stop when we hit zero, otherwise stop when we hit the end of the array
     let stop_condition = match i { Left(_) | Down(_) => 0, Right(_) | Up(_) => lines.elements.len() };
+    let dir = match i { Left(_) | Right(_) => Direction::H, Up(_) | Down(_) => Direction::V };
+    let traveling_line = Line { c: traveling_along, dir, signal_delay: self.signal_delay, range: (current_coord, new_coord) };
     
     loop {
       if lines.split == stop_condition {
@@ -218,10 +275,9 @@ impl WireIndex {
           continue;
         }
 
-        let intersection = match i { Left(_) | Right(_) => (line.c, traveling_along), Up(_) | Down(_) => (traveling_along, line.c) };
         closest = match closest {
-          None if manhattan_distance(intersection) != 0 => Some(intersection),
-          Some(closest) if manhattan_distance(intersection) < manhattan_distance(closest) => Some(intersection),
+          None if metric(&traveling_line, &line) != 0 => Some((traveling_line.clone(), line.clone())),
+          Some((a,b)) if metric(&traveling_line, &line) < metric(&a, &b) => Some((traveling_line.clone(), line.clone())),
           _ => closest,
         }
       } else {
@@ -234,18 +290,21 @@ impl WireIndex {
       Left(_) | Right(_) => self.cx = new_coord,
       Up(_) | Down(_) => self.cy = new_coord,
     }
+    self.signal_delay += traveling_line.len();
 
     return closest;
   }
 
-  pub fn find_closest_intersection(&mut self, w: WireDescription) -> Option<(i32, i32)> {
+  pub fn find_best_intersection<F>(&mut self, w: WireDescription, metric: F) -> Option<(Line, Line)>
+    where
+      F: Fn(&Line, &Line) -> u32 {
     let mut closest = None;
     for instruction in w.instructions {
-      let intersection = self.ingest_instruction(instruction);
-      if let Some(intersection) = intersection {
+      let intersection = self.ingest_instruction(instruction, manhattan_distance);
+      if let Some((a, b)) = intersection {
         closest = match closest {
-          None if manhattan_distance(intersection) != 0 => Some(intersection),
-          Some(closest) if manhattan_distance(intersection) < manhattan_distance(closest) => Some(intersection),
+          None if metric(&a, &b) != 0 => Some((a,b)),
+          Some((x,y)) if metric(&a, &b) < metric(&x, &y) => Some((a,b)),
           _ => closest,
         }
       }
@@ -296,21 +355,21 @@ mod tests {
 
   #[test]
   fn test_manhattan_distance() {
-    assert_eq!(2, manhattan_distance((1,1)));
-    assert_eq!(2, manhattan_distance((-1,1)));
-    assert_eq!(2, manhattan_distance((1,-1)));
-    assert_eq!(2, manhattan_distance((-1,-1)));
-    assert_eq!(10, manhattan_distance((-5,5)));
+    assert_eq!(2, manhattan_distance(&Line { c: 1, ..Default::default() }, &Line { c: 1, ..Default::default() }));
+    assert_eq!(2, manhattan_distance(&Line { c: -1, ..Default::default() }, &Line { c: 1, ..Default::default() }));
+    assert_eq!(2, manhattan_distance(&Line { c: 1, ..Default::default() }, &Line { c: -1, ..Default::default() }));
+    assert_eq!(2, manhattan_distance(&Line { c: -1, ..Default::default() }, &Line { c: -1, ..Default::default() }));
+    assert_eq!(10, manhattan_distance(&Line { c: -5, ..Default::default() }, &Line { c: 5, ..Default::default() }));
   }
  
   #[test]
   pub fn test_wire_crossing() {
     let wire = "R8,U5,L5,D3".parse::<Wire>().unwrap();
     let mut index = WireIndex::new(wire);
-    assert_matches!(index.ingest_instruction(Instruction::Up(7)), None);
-    assert_matches!(index.ingest_instruction(Instruction::Right(6)), None);
-    assert_matches!(index.ingest_instruction(Instruction::Down(4)), Some((6,5)));
-    assert_matches!(index.ingest_instruction(Instruction::Left(4)), Some((3,3)));
+    assert_matches!(index.ingest_instruction(Instruction::Up(7), manhattan_distance), None);
+    assert_matches!(index.ingest_instruction(Instruction::Right(6), manhattan_distance), None);
+    assert_matches!(index.ingest_instruction(Instruction::Down(4), manhattan_distance), Some((Line { c: 6, .. }, Line { c: 5, .. })));
+    assert_matches!(index.ingest_instruction(Instruction::Left(4), manhattan_distance), Some((Line { c: 3, .. }, Line { c: 3, .. })));
   }
 
   #[test]
@@ -318,6 +377,17 @@ mod tests {
     let wire = "R8,U5,L5,D3".parse::<Wire>().unwrap();
     let mut index = WireIndex::new(wire);
     let desc = "U7,R6,D4,L4".parse::<WireDescription>().unwrap();
-    assert_matches!(index.find_closest_intersection(desc), Some((3,3)));
+    assert_matches!(index.find_best_intersection(desc, manhattan_distance), Some((Line { c: 3, .. }, Line { c: 3, .. })));
+  }
+
+  #[test]
+  pub fn test_signal_delay() {
+    let wire = "R8,U5,L5,D3".parse::<Wire>().unwrap();
+    let mut index = WireIndex::new(wire);
+    let desc = "U7,R6,D4,L4".parse::<WireDescription>().unwrap();
+    let intersection = index.find_best_intersection(desc, signal_delay);
+    assert_matches!(intersection, Some((Line { c: 6, .. }, Line { c: 5, .. })));
+    let intersection = intersection.unwrap();
+    assert_eq!(30, signal_delay(&intersection.0, &intersection.1));
   }
 }
