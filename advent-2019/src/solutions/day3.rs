@@ -85,12 +85,6 @@ pub enum Instruction {
 }
 
 impl Instruction {
-  pub fn len(&self) -> u32 {
-    use Instruction::*;
-    match self {
-      Right(l) | Left(l) | Up(l) | Down(l) => l.abs() as u32,
-    }
-  }
   pub fn follow(&self, signal_delay: u32, (sx, sy): (i32, i32)) -> (Line, (i32, i32)) {
     match &self {
       Instruction::Right(x) => (Line { dir: Direction::H, signal_delay, c: sy, range: (sx, sx + x) }, (sx + x, sy)),

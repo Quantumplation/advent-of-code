@@ -3,7 +3,7 @@ use crate::intcode::Computer;
 
 pub mod part1 {
   use super::*;
-  pub fn solve(computer: Computer) -> Result<usize> {
+  pub fn solve(computer: Computer) -> Result<isize> {
     let mut computer = computer;
     computer.memory[1] = 12;
     computer.memory[2] = 2;
@@ -14,7 +14,7 @@ pub mod part1 {
 
 pub mod part2 {
   use super::*;
-  pub fn solve(computer: Computer) -> Result<usize> {
+  pub fn solve(computer: Computer) -> Result<isize> {
     for noun in 0..100 {
       for verb in 0..100 {
         let mut computer = computer.clone();
