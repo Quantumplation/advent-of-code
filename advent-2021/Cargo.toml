@@ -1,5 +1,5 @@
 [package]
-name = "advent-2019"
+name = "advent-2021"
 version = "0.1.0"
 authors = ["Pi Lanningham <pi.lanningham@gmail.com>"]
 edition = "2018"
@@ -11,4 +11,5 @@ advent-shared = { path = "../advent-shared" }
 anyhow = "1.0.34"
 matches = "0.1.8"
 nom = "7.0.0"
-sorted-vec = "0.5.2"
+num = "0.4.0"
+intrusive-collections = "0.9.0"
