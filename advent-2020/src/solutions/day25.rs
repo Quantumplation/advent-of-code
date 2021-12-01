@@ -9,9 +9,7 @@ pub mod part1 {
 
 pub mod part2 {
     use anyhow::Result;
-
-    use super::*;
-    pub fn solve(numbers: Vec<u64>) -> Result<String> {
+    pub fn solve(_numbers: Vec<u64>) -> Result<String> {
         Ok("Merry Christmas!".to_string())
     }
 }

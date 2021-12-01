@@ -126,7 +126,7 @@ impl CupGame {
   }
 
   pub fn run(&mut self, steps: usize) {
-    for i in 0..steps {
+    for _ in 0..steps {
       self.step();
     }
   }

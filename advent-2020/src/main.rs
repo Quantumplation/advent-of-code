@@ -1,4 +1,3 @@
-#[feature(iterator_fold_self)]
 mod parsers;
 mod solutions;
 
