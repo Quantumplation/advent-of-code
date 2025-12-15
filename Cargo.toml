@@ -1,9 +1,11 @@
 [workspace]
+resolver = "3"
 
 members = [
   "advent-shared",
   "advent-2019",
   "advent-2020",
-  "advent-2021"
+  "advent-2021",
+  "advent-2025"
 ]
-default-members = ["advent-2021"]
+default-members = ["advent-2025"]

@@ -1,5 +1,5 @@
 [package]
-name = "advent-shared"
+name = "advent-2025"
 version = "0.1.0"
 authors = ["Pi Lanningham <pi.lanningham@gmail.com>"]
 edition = "2024"
@@ -7,4 +7,9 @@ edition = "2024"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+advent-shared = { path = "../advent-shared" }
 anyhow = "1.0.34"
+matches = "0.1.8"
+nom = "7.0.0"
+num = "0.4.0"
+intrusive-collections = "0.9.0"
